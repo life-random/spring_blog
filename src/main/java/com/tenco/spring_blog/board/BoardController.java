@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +21,7 @@ public class BoardController {
 
     // GET http://localhost:8080/  ,   http://localhost:8080/board/list
     @GetMapping({"/", "/board/list"})
+    // @ResponseBody   // 템플릿 엔진을 사용하는 것이 아니라 그냥 데이터만 반환한다
     public String list(Model model) {
         List<Board> boardList = boardPersistRepository.findAll();
         model.addAttribute("boardList", boardList);
