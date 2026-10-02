@@ -40,6 +40,20 @@ public class Board {
         this.username = username;
     }
 
+    // 자신에 상태값을 변경하느 메서드 추가 (영속성 엔티티를 수정하는 메서드)
+    public void update(BoardRequest.UpdateDto updateDto) {
+        // 비즈니스 규칙 검증
+        updateDto.validate();
+        // 영속 상태에 있는 엔티티의 필드값을 여기서 변경
+        this.title = updateDto.getTitle();
+        this.content = updateDto.getContent();
+        // 변경 감지 (Dirty Checking) 동작 과장
+        // 1. 영속성 컨텍스트가 엔티티 최초 상태를 스냅샹으로 따로 보관
+        // 2. 필드값 변경시 현재 시점 상태와 스냅샷 비교
+        // 3. 트랜잭션 커밋 시점에 변경된 필드만 UPDATE 쿼리르 자동 생성
+        // 4. UPDATE board_tb SET title = ?, content = ? WHERE id = ?
+    }
+
     // 시간을 포맷을 메서드를 추가
     public String getTime() {
         return MyDateUtil.timestampFormat(createdAt);

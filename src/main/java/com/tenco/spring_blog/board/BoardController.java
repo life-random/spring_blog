@@ -25,7 +25,7 @@ public class BoardController {
     // GET http://localhost:8080/  ,   http://localhost:8080/board/list
     @GetMapping({"/", "/board/list"})
     public String list(Model model) {
-        List<Board> boardList = boardNativeRepository.findAll();
+        List<Board> boardList = boardPersistRepository.findAll();
         model.addAttribute("boardList", boardList);
         return "board/list";
     }
@@ -33,11 +33,16 @@ public class BoardController {
     // GET http://localhost:8080/board/3
     @GetMapping("/board/{id}")
     public String detail(@PathVariable(name = "id") Long id, Model model) {
-        Board board = boardNativeRepository.findById(id);
-        if (board == null) {
-            return "redirect:/";
+
+        Board boardEntity = boardPersistRepository.findById(id);
+//        Board boardEntity = boardPersistRepository.findByIdWithJQPL(id);
+        if (boardEntity == null) {
+            // 추후에 404 에러 페이지를 만들어서 처리할 예정
+            throw new RuntimeException("계시글을 찾을 수 없습니다 : " + id);
         }
-        model.addAttribute("board", board);
+
+        model.addAttribute("board", boardEntity);
+
         return "board/detail";
     }
 
@@ -70,7 +75,7 @@ public class BoardController {
     @GetMapping("/board/{id}/update")
     public String updateForm(@PathVariable Long id, Model model) {
         // 수정하기 화면 요청 (먼저 조회 부터)
-        Board board = boardNativeRepository.findById(id);
+        Board board = boardPersistRepository.findById(id);
         model.addAttribute("board", board);
         return "board/update-form";
     }
@@ -78,10 +83,11 @@ public class BoardController {
     // POST http://localhost:8080/board/1/update (게시글 수정 기능 요청)
     @PostMapping("/board/{id}/update")
     public String update(@PathVariable Long id,
-                         @RequestParam(name = "title") String title,
-                         @RequestParam(name = "content") String content) {
+                         BoardRequest.UpdateDto reqDto) {
 
-        boardNativeRepository.updateById(title, content, id);
+        reqDto.validate();  // 유효성 실패 (throw 던져짐)
+
+        boardPersistRepository.updateById(id, reqDto);
         // PRG 패턴
         return "redirect:/board/" + id; // 리다이렉트 수정된 게시글 상세보기 화면 이동
     }
@@ -89,7 +95,7 @@ public class BoardController {
     // 게시글 삭제
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable Long id) {
-        boardNativeRepository.deleteById(id);
+        boardPersistRepository.deleteById(id);
         // PRG 패턴
         return "redirect:/";
     }
