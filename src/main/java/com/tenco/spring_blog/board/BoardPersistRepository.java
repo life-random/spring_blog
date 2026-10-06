@@ -27,7 +27,7 @@ public class BoardPersistRepository {
         // 1. 수정할 엔티티를 먼저 조회 후 영속 상태로 만듬
         Board boardEntity = em.find(Board.class, id);
         // 2. 엔티티 존재 여부 확인
-        if (boardEntity == null){
+        if (boardEntity == null) {
             throw new IllegalArgumentException("수정할 계시물을 찾을 수 없습니다");
         }
         // 엔티티 객체 상태 변경 중
@@ -40,12 +40,12 @@ public class BoardPersistRepository {
 
     // 게시글 삭제하기 (영속성 컨텍스트를 활용한 안전한 삭제
     @Transactional
-    public void deleteById(Long id){
+    public void deleteById(Long id) {
         // 1. 먼저 삭제할 엔티티를 영속 상태로 조회부터 해야 함
         Board boardEntity = em.find(Board.class, id);
 
         // 2. 엔티티 존재 여부 확인 (안전한 삭제)
-        if(boardEntity == null) {
+        if (boardEntity == null) {
             throw new IllegalArgumentException("삭제할 계시글을 찾을 수 없습니다");
 
         }
@@ -134,26 +134,6 @@ public class BoardPersistRepository {
         // 4. 영속 상태의 객체를 반환
         //    - 자동으로 생성된 id 값을 포함한 객체가 반환 됨.
     }
-
-    // 엔티티의 영속 상태 4가지
-    // 1. 비영속 상태 : 새로 생성된 객체, 영속성 컨텍스트와 무관
-    // 2. 영속   상태 : 영속성 컨텍스트의 관리되는 상태
-    // 3. 준 영속 상태 : 영속성 컨텍스트에서 분리된 상태
-    // 4. 삭제   상태 : 삭제 예정 상태 (트랜잭션 커밋 시 DELETE 쿼리 실행)
-    private void entityLifecycleEx() {
-        // 1. 비영속
-        Board board = new Board("제목", "내용", "작성자");
-
-        // 2. 영속
-        em.persist(board);
-
-        // 3. 준 영속 : 영속성 컨텍스트에서 분리된 상태
-        em.detach(board);
-
-        // 5. 삭제 : 삭제 예정 상태
-        em.remove(board);
-    }
-
 }
 
 
