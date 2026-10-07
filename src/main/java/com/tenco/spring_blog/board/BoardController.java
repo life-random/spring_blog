@@ -1,5 +1,7 @@
 package com.tenco.spring_blog.board;
 
+import com.tenco.spring_blog.user.User;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -7,10 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Slf4j
@@ -49,7 +51,12 @@ public class BoardController {
 
     // GET http://localhost:8080/board/save (화면 요청)
     @GetMapping("/board/save")
-    public String saveForm() {
+    public String saveForm(HttpSession session) {
+        // 1. 인증 검사 : 로그인 안된 사용자는 접근 못하게 처리
+        User sessionUser = (User) session.getAttribute("sessionUser");
+        if (sessionUser == null){
+            return "redirect:/login";
+        }
         return "board/save-form";
     }
 
@@ -57,18 +64,28 @@ public class BoardController {
     @PostMapping("/board/save")
     // Spring 폼 데이터를 객체로 변환하는 과정 (데이터 바인딩 메커니즘)
     // 폼 데이터 바인딩 : Spring이 HTTP  요청 파라미터를 객체로 자동 변환
-    public String save(BoardRequest.SaveDto reqDto) {
-// TODO - 수정 예정
-        // 1. DTO에서 Entity 클래스 타입으로 변환 해주어야 한다.
-//        Board board = Board.builder()
-//                .title(reqDto.getTitle())
-//                .content(reqDto.getContent())
-//                .user(reqDto.getUs)
-//                .build();
-//                //new Board(reqDto.getTitle(), reqDto.getContent(), reqDto.getUsername());
-//        Board boardEntity  = boardPersistRepository.save(board);
+    public String save(BoardRequest.SaveDto saveDto, HttpSession session) {
+        // 1. 인증검사
+        User sesstionUser = (User) session.getAttribute("sessionUser");
+        if (sesstionUser == null) {
+            return "redirect:/login";
+        }
+        // 2. 유효성 검사
+        try {
+            // 입력 데이터 검증
+            saveDto.validate();
+            // DTO 에서 Board 객체 생성
+            Board board = saveDto.toEntity(sesstionUser);
+            // Board 저장
+            boardPersistRepository.save(board);
+            // 저장 성공 시 메인 페이지 이동
+            return "redirect:/";
 
-        return "redirect:/";
+        } catch (Exception e) {
+            // 검증 실패시 메세지와 함께 작성 폼으로 돌아감 (메시지 생략)
+            log.error(e.getMessage());
+            return "board/save-form";
+        }
     }
 
     // GET http://localhost:8080/board/1/update (화면 요청)
@@ -94,10 +111,41 @@ public class BoardController {
 
     // 게시글 삭제
     @PostMapping("/board/{id}/delete")
-    public String delete(@PathVariable Long id) {
-        boardPersistRepository.deleteById(id);
-        // PRG 패턴
-        return "redirect:/";
+    public String delete(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        // 1. 인증 검사 (로그인 여부 확인)
+        // 2. 권한 확인 -- 로그인 했지만 내가 작성한 글 인지 여부 확인
+        // 2.1 - 관리자 광고성 게시글 .. 삭제도 가능 (권한)
+
+        User sessionUser = (User)session.getAttribute("sessionUser");
+
+
+        try {
+            if (sessionUser == null) {
+            return "redirect:/login";
+            }
+            // 2. 삭제할 계시글 조회 (권한 체크를 위해
+            Board boardEntity = boardPersistRepository.findById(id);
+            // 3. 권한 체크 : 본인이 작성한 게시글만 삭제
+            if (!boardEntity.isOwner(sessionUser.getId())){
+                throw new RuntimeException("삭제 권한이 없습니다");
+            }
+            // 4. 권한 확인 후 삭제 실행
+            boardPersistRepository.deleteById(id);
+            // 5. 삭제 성공 후 메인 페이지 리다이렉트
+            // PRG 패턴
+            return "redirect:/";
+        } catch (Exception e) {
+            log.error("삭제 실패 : {}", e.getMessage());
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    e.getMessage()
+            );
+
+            return "redirect:/board/" + id;
+        }
+
+
     }
 
 }

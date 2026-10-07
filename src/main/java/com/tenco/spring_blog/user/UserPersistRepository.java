@@ -41,7 +41,7 @@ public class UserPersistRepository {
 
     // 사용자 명 중복 체크용 조회 메서드
     public User findByUsername(String username) {
-        // JPQL 사용 (em.find())는 PK 기반을 ㅗ조회  함) 우리가 필요한 건 username  기반으로 조회 해야 함
+        // JPQL 사용 (em.find())는 PK 기반을 조회  함) 우리가 필요한 건 username  기반으로 조회 해야 함
         String jpql = """
                 SELECT u FROM User u WHERE u.username = :username
                 """;
