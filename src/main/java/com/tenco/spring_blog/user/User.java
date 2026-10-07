@@ -1,10 +1,8 @@
 package com.tenco.spring_blog.user;
 
+import com.tenco.spring_blog.board.BoardRequest;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -23,6 +21,7 @@ public class User {
     // 같은 사용자명을 두 번 가입할 수 없도록 유니크 제약
     @Column(unique = true)
     private String username;
+    @Setter
     private String password;
     @Column(unique = true)
     private String email;
@@ -38,4 +37,9 @@ public class User {
         this.email = email;
     }
 
+    // 회원 정보 수정 (변경 감지용)
+    public void update(String password) {
+        this.password = password;
+
+    }
 }
