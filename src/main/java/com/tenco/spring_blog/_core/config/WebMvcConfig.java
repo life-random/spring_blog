@@ -1,14 +1,11 @@
 package com.tenco.spring_blog._core.config;
 
+import com.tenco.spring_blog._core.interceptor.IpBlockInterceptor;
 import com.tenco.spring_blog._core.interceptor.LoginInterceptor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 //IoC
 @RequiredArgsConstructor
@@ -17,10 +14,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
+    private final IpBlockInterceptor ipBlockInterceptor;
 
     // 내가 정한 인터셉터를 설정 클래스 등록할 수 있다
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(ipBlockInterceptor)
+                        .addPathPatterns("/**");
+
         // LoginInterceptor를 시스템에 등록
         registry.addInterceptor(loginInterceptor)
                 //인터셉터가 동작할 URL 패턴을 지정
