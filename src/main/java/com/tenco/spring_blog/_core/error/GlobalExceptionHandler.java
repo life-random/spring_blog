@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception401.class)
     public String ex401(Exception401 e, HttpServletRequest request, RedirectAttributes rttr){
-        log.warn("==== 401 Unathorized 에러 발생 ====");
+        log.warn("==== 401 Unauthorized 에러 발생 ====");
         log.warn("요청 url : {}", request.getRequestURL());
         log.warn("인증 오류 : {}", e.getMessage());
         log.warn("예외 클래스 : {}", e.getClass().getSimpleName());

@@ -27,7 +27,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 //인터셉터가 동작할 URL 패턴을 지정
                 .addPathPatterns("/user/**", "/board/**")
                 //인터셉터에서 제외할 URL 패턴 지정
-                .excludePathPatterns("/booard/list", "/board/{id:\\d+}");
+                .excludePathPatterns("/board/list", "/board/{id:\\d+}");
                 // \\d+ 는 정규표현식으로 1개 이상의 숫자를 의미한다
         // 예: /board/1, /board/123 (상세보기)은 로그인 없이도 접근 가능
         // /board/1/update 처럼 뒤에 경로가 더 붙으면 제외 대상이 아니게 된다.

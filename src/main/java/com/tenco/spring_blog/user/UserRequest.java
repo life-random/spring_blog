@@ -70,7 +70,7 @@ public class UserRequest {
                 throw new Exception400("사용자명은 필수 입니다. ");
             }
             if(password == null || password.trim().isEmpty()) {
-                throw new Exception400("사용자명은 필수 입니다. ");
+                throw new Exception400("패스워드는 필수 입니다. ");
             }
         }
     }
