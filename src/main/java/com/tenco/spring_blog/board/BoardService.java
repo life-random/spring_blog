@@ -26,19 +26,19 @@ public class BoardService {
 
     private final BoardJpaRepository boardJpaRepository;
     private final UserJpaRepository userJpaRepository;
+
     /**
      * 게시글 저장
      *
-     * @param saveDto        게시글 저장 정보
-     * @param sessionUserDto 작성자 정보
+     * @param saveDto     게시글 저장 정보
+     * @param sessionUser 작성자 정보
      * @return 저장된 게시글
      */
     @Transactional
     // 데이터 수정이 필요하므로 트랜잭션 읽기 전용 설정을 해제하고 쓰기 가능한 트랜잭션으로 실행 됨.
-    public Board save(BoardRequest.SaveDto saveDto, SessionUserDto sessionUserDto) {
-        log.info("게시글 저장 시작 - 제목 : {}, 작성자 : {}", saveDto.getTitle(), sessionUserDto.getUsername());
-//        Board board = saveDto.toEntity(sessionUserDto);
-        User user = userJpaRepository.getReferenceById(sessionUserDto.getId());
+    public Board save(BoardRequest.SaveDto saveDto, SessionUserDto sessionUser) {
+        log.info("게시글 저장 시작 - 제목 : {}, 작성자 : {}", saveDto.getTitle(), sessionUser.getUsername());
+        User user = userJpaRepository.getReferenceById(sessionUser.getId());
         Board savedBoard = boardJpaRepository.save(saveDto.toEntity(user));
         log.info("게시글 저장 완료 - ID : {}, 제목 : {}", savedBoard.getId(), savedBoard.getTitle());
         return savedBoard;
@@ -46,45 +46,42 @@ public class BoardService {
 
     /**
      * 게시글 상세 조회
-     *
-     * @param id 게시글 PK
+     * @param id  게시글 PK
      * @return 게시글 정보 (작성자 정보 포함)
      */
     public BoardResponse.DetailDto findById(Long id) {
         log.info("게시글 상세 조회 서비스 - ID : {} ", id);
-        // boardJpaRepository.findById(id) <-- 이 메서드 대신 JOIN FETCH  를 사용 함
         Board board = boardJpaRepository.findByIdJoinUser(id)
-                        .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
-
+                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
         log.info("게시글 상세 조회 완료 - 제목 : {}, 작성자 : {} ", board.getTitle(), board.getUser().getUsername());
         return new BoardResponse.DetailDto(board);
     }
 
+
     /**
      * 게시글 목록 조회(메인 페이지용)
-     *
      * @return 게시글 목록(작성자 정보 포함)
      */
     public List<BoardResponse.ListDto> findAll() {
         log.info("게시글 목록 조회 시작");
         List<Board> boardList = boardJpaRepository.findAllJoinUser();
-
         // 방법 1 메서드 참조 문법
         return boardList.stream()
                 .map(BoardResponse.ListDto::new)
                 .toList();
 
         // 방법 2 람다 표현식 (스트림 API 활용)
-//        List<BoardResponse.ListDto> dtoList = new ArrayList<>();
-//        dtoList = boardList.stream()
+        //List<BoardResponse.ListDto> dtoList = new ArrayList<>();
+//         dtoList =  boardList.stream()
 //                .map(board -> new BoardResponse.ListDto(board))
 //                .toList();
 
         // 방법 3
 //        List<BoardResponse.ListDto> dtoList = new ArrayList<>();
-//        for (Board board : boardList){
+//        for (Board board : boardList) {
 //            dtoList.add(new BoardResponse.ListDto(board));
 //        }
+
 
 //        log.info("게시글 목록 조회 완료");
 //        return boardList;
@@ -96,32 +93,30 @@ public class BoardService {
      * @param userId
      * @return
      */
-    public BoardResponse.UpdateFormDto findByIdAndUpdateForm(Long id, Long userId){
-        Board board = boardJpaRepository.findById(id)
+    public BoardResponse.UpdateFormDto findByIdAndUpdateForm(Long id, Long userId) {
+        Board board = boardJpaRepository.findByIdJoinUser(id)
                 .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
-
         // 인가 검사
-        if (!board.isOwner(userId)){
+        if (!board.isOwner(userId)) {
             throw new Exception403("게시글 수정 권한이 없습니다");
         }
-
         return new BoardResponse.UpdateFormDto(board);
     }
 
+
     /**
-     * 게시글 수정 기능 요청1(권한 체크)
-     *
-     * @param id          게시글 PK
-     * @param updateDto   수정할 정보
-     * @param sessionUserDto 요청자 정보
+     * 게시글 수정 기능 요청 (권한 체크)
+     * @param id 게시글 PK
+     * @param updateDto 수정할 정보
+     * @param sessionUser 요청자 정보
      * @return 수정된 게시글
      */
     @Transactional
-    public Board updateById(Long id, BoardRequest.UpdateDto updateDto, SessionUserDto sessionUserDto) {
+    public Board updateById(Long id, BoardRequest.UpdateDto updateDto, SessionUserDto sessionUser) {
         log.info("게시글 수정 시작");
         Board board = boardJpaRepository.findByIdJoinUser(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
-        if (!board.isOwner(sessionUserDto.getId())) {
+                .orElseThrow(() -> new Exception404("게시글 찾을 수 없음"));
+        if (!board.isOwner(sessionUser.getId())) {
             throw new Exception403("본인이 작성한 게시글만 수정할 수 있습니다");
         }
         board.update(updateDto);
@@ -131,16 +126,15 @@ public class BoardService {
 
     // 게시글 삭제
     @Transactional
-    public void deleteById(Long id, SessionUserDto sessionUserDto) {
+    public void deleteById(Long id, SessionUserDto sessionUser) {
         log.info("게시글 삭제 시작");
         Board board = boardJpaRepository.findByIdJoinUser(id)
-                .orElseThrow(() -> new Exception404("게시글을 찾을 수 없습니다"));
-        if (!board.isOwner(sessionUserDto.getId())) {
+                .orElseThrow(() -> new Exception404("게시글 찾을 수 없음"));
+        if (!board.isOwner(sessionUser.getId())) {
             log.warn("게시글 삭제 권한 없음 - 게시글 ID : {}, 작성자: {}, 요청자 : {}",
-                    id, board.getUser().getUsername(), sessionUserDto.getUsername());
+                    id, board.getUser().getUsername(), sessionUser.getUsername());
             throw new Exception403("본인이 작성한 게시글만 삭제할 수 있습니다");
         }
-
         boardJpaRepository.deleteById(id);
         log.info("게시글 삭제 종료");
     }

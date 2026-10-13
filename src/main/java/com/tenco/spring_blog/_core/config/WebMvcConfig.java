@@ -2,6 +2,7 @@ package com.tenco.spring_blog._core.config;
 
 import com.tenco.spring_blog._core.interceptor.IpBlockInterceptor;
 import com.tenco.spring_blog._core.interceptor.LoginInterceptor;
+import com.tenco.spring_blog._core.interceptor.SessionUserModelInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -15,10 +16,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
     private final IpBlockInterceptor ipBlockInterceptor;
+    private final SessionUserModelInterceptor sessionUserModelInterceptor;
 
     // 내가 정한 인터셉터를 설정 클래스 등록할 수 있다
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(sessionUserModelInterceptor)
+                .addPathPatterns("/**");
+
         registry.addInterceptor(ipBlockInterceptor)
                         .addPathPatterns("/**");
 

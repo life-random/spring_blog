@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
 
@@ -20,7 +22,6 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    // GET http://localhost:8080/
     @GetMapping({"/", "/board/list"})
     public String list(Model model) {
         List<BoardResponse.ListDto> boardList = boardService.findAll();
@@ -32,18 +33,16 @@ public class BoardController {
     // excludePathPatterns로 제외되어 로그인 접근 가능
     @GetMapping("/board/{id}")
     public String detail(@PathVariable(name = "id") Long id, Model model) {
-        BoardResponse.DetailDto board = boardService.findById(id);
-        model.addAttribute("board", board);
+        BoardResponse.DetailDto detailDto = boardService.findById(id);
+        model.addAttribute("board", detailDto);
         return "board/detail";
     }
-
 
     // GET http://localhost:8080/board/save (화면 요청)
     @GetMapping("/board/save")
     public String saveForm(HttpSession session) {
         return "board/save-form";
     }
-
 
     @PostMapping("/board/save")
     public String save(BoardRequest.SaveDto saveDto, HttpSession session) {
@@ -56,19 +55,17 @@ public class BoardController {
     // GET http://localhost:8080/board/1/update (화면 요청)
     @GetMapping("/board/{id}/update")
     public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
-
-        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        SessionUserDto sessionUserDto  = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
         BoardResponse.UpdateFormDto updateFormDto = boardService.findByIdAndUpdateForm(id, sessionUserDto.getId());
-
         model.addAttribute("board", updateFormDto);
         return "board/update-form";
     }
-
 
     // POST http://localhost:8080/board/1/update (게시글 수정 기능 요청)
     @PostMapping("/board/{id}/update")
     public String update(@PathVariable Long id,
                          BoardRequest.UpdateDto updateDto, HttpSession session) {
+
         updateDto.validate();
         SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
         boardService.updateById(id, updateDto, sessionUserDto);
