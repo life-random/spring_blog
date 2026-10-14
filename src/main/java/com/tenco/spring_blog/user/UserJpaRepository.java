@@ -13,6 +13,7 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
     /**
      *  1. 등록 및 수정 : save(Board entity);
      *      - 엔티티를 DB에 저장합니다. ID가 없으면 INSERT, 있으면 UPDATE를 실행 함.
+     *
      *  2. 단건 조회 :  findById(Long id)
      *      - ID로 엔티티를 조회하면 Optional<Board> 타입을 반환합니다.
      *
@@ -24,6 +25,7 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
      *
      *  5. 데이터 개수: count();
      *     - 전체 레코드의 개수를 반환합니다.
+     *
      *  6. 존재 여부 확인 : existsById(Long id);
      *     - 해당 ID를 가진 데이터가 있는지 확인하여 boolean 을 반환합니다.
      *

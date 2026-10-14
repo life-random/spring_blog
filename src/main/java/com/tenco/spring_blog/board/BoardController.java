@@ -2,6 +2,9 @@ package com.tenco.spring_blog.board;
 
 import com.tenco.spring_blog._core.error.Exception403;
 import com.tenco.spring_blog._core.util.Define;
+import com.tenco.spring_blog.reply.Reply;
+import com.tenco.spring_blog.reply.ReplyResponse;
+import com.tenco.spring_blog.reply.ReplyService;
 import com.tenco.spring_blog.user.SessionUserDto;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final ReplyService replyService;
 
     @GetMapping({"/", "/board/list"})
     public String list(Model model) {
@@ -32,9 +36,18 @@ public class BoardController {
     // GET http://localhost:8080/board/3
     // excludePathPatterns로 제외되어 로그인 접근 가능
     @GetMapping("/board/{id}")
-    public String detail(@PathVariable(name = "id") Long id, Model model) {
+    public String detail(@PathVariable(name = "id") Long id, Model model, HttpSession session) {
         BoardResponse.DetailDto detailDto = boardService.findById(id);
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+
+        Long sessionUserId = (sessionUserDto == null) ? null : sessionUserDto.getId();
+
+        boolean isOwner = sessionUserDto != null && detailDto.getUserId().equals(sessionUserDto.getId());
+        List<ReplyResponse.ListDto> replyList = replyService.findAllByBoardId(id, sessionUserId);
+
         model.addAttribute("board", detailDto);
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("replyList", replyList);
         return "board/detail";
     }
 
@@ -55,7 +68,7 @@ public class BoardController {
     // GET http://localhost:8080/board/1/update (화면 요청)
     @GetMapping("/board/{id}/update")
     public String updateForm(@PathVariable Long id, Model model, HttpSession session) {
-        SessionUserDto sessionUserDto  = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
         BoardResponse.UpdateFormDto updateFormDto = boardService.findByIdAndUpdateForm(id, sessionUserDto.getId());
         model.addAttribute("board", updateFormDto);
         return "board/update-form";

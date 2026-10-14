@@ -30,7 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         // LoginInterceptor를 시스템에 등록
         registry.addInterceptor(loginInterceptor)
                 //인터셉터가 동작할 URL 패턴을 지정
-                .addPathPatterns("/user/**", "/board/**")
+                .addPathPatterns("/user/**", "/board/**", "/reply/**")
                 //인터셉터에서 제외할 URL 패턴 지정
                 .excludePathPatterns("/board/list", "/board/{id:\\d+}");
                 // \\d+ 는 정규표현식으로 1개 이상의 숫자를 의미한다
