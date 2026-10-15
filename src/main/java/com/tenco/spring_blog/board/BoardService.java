@@ -8,6 +8,10 @@ import com.tenco.spring_blog.user.User;
 import com.tenco.spring_blog.user.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,22 +75,6 @@ public class BoardService {
         return boardList.stream()
                 .map(BoardResponse.ListDto::new)
                 .toList();
-
-        // 방법 2 람다 표현식 (스트림 API 활용)
-        //List<BoardResponse.ListDto> dtoList = new ArrayList<>();
-//         dtoList =  boardList.stream()
-//                .map(board -> new BoardResponse.ListDto(board))
-//                .toList();
-
-        // 방법 3
-//        List<BoardResponse.ListDto> dtoList = new ArrayList<>();
-//        for (Board board : boardList) {
-//            dtoList.add(new BoardResponse.ListDto(board));
-//        }
-
-
-//        log.info("게시글 목록 조회 완료");
-//        return boardList;
     }
 
     /**
@@ -139,9 +127,26 @@ public class BoardService {
         }
         // boardId로 댓글 먼저 삭제
         replyJpaRepository.deleteByBoardId(id);
+
         // boardId로 board 삭제
         boardJpaRepository.deleteById(id);
         log.info("게시글 삭제 종료");
+    }
+
+    public BoardResponse.PageDto findAllPage(int page, int size) {
+        log.info("게시글 목록 조회 시작");
+
+        int pageIndex = Math.max(0, page -1);
+        int validSize = Math.max(1, Math.min(50, size));
+
+        // 최신 글이 먼저 오도록 id 내림차순 정렬 (주문서 생성)
+        Pageable pageable =  PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
+        // 페이징 처리가 된 게시글 목록 조회 요청 (주문 결과 Page)
+        Page<Board> boardPage = boardJpaRepository.findAllJoinUser(pageable);
+        // 조회 후 트랜잭션 안에서 응답 DTO로 변환 처리
+        BoardResponse.PageDto pageDto = new BoardResponse.PageDto(boardPage);
+
+        return pageDto;
     }
 
 }

@@ -1,5 +1,7 @@
 package com.tenco.spring_blog.board;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,6 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BoardJpaRepository extends JpaRepository<Board, Long> {
+
+    // 게시글 페이징 조회(작성자 함께 조인해서 조회)
+// 정렬은 Pageable 에 담아서 전달하므로 쿼리에 ORDER BY를 쓰지 않음 !!
+    @Query(value = "SELECT b FROM Board b JOIN FETCH b.user u ",
+            countQuery = "SELECT COUNT(b) FROM Board b")
+    Page<Board> findAllJoinUser(Pageable pageable);
+
     // 기본적인 CRUD 기능 다 만들어 져 있음.
     /**
      *  1. 등록 및 수정 : save(Board entity);
