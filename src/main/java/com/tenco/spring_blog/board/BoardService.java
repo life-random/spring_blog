@@ -133,20 +133,27 @@ public class BoardService {
         log.info("게시글 삭제 종료");
     }
 
-    public BoardResponse.PageDto findAllPage(int page, int size) {
+    /**
+     * 게시글 검색 목록 조회 및 페이징 처리(메인 페이지욘
+     * @return
+     */
+    public BoardResponse.PageDto findAllPage(int page, int size, String keyword) {
         log.info("게시글 목록 조회 시작");
 
         int pageIndex = Math.max(0, page -1);
         int validSize = Math.max(1, Math.min(50, size));
 
+        Page<Board> boardPage;
+        // 최신 글이 먼저 오도록 id 내림차순 정렬 (주문서 생성)
         // 최신 글이 먼저 오도록 id 내림차순 정렬 (주문서 생성)
         Pageable pageable =  PageRequest.of(pageIndex, validSize, Sort.by(Sort.Direction.DESC, "id"));
-        // 페이징 처리가 된 게시글 목록 조회 요청 (주문 결과 Page)
-        Page<Board> boardPage = boardJpaRepository.findAllJoinUser(pageable);
-        // 조회 후 트랜잭션 안에서 응답 DTO로 변환 처리
-        BoardResponse.PageDto pageDto = new BoardResponse.PageDto(boardPage);
 
-        return pageDto;
+        if (keyword == null || keyword.isBlank()){
+            boardPage = boardJpaRepository.findAllJoinUser(pageable);
+        } else {
+            boardPage = boardJpaRepository.findAllKeywordJoinUser(pageable, keyword);
+        }
+
+        return new BoardResponse.PageDto(boardPage);
     }
-
 }

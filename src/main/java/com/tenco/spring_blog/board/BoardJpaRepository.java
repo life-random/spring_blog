@@ -17,24 +17,39 @@ public interface BoardJpaRepository extends JpaRepository<Board, Long> {
             countQuery = "SELECT COUNT(b) FROM Board b")
     Page<Board> findAllJoinUser(Pageable pageable);
 
+    // 게시글 검색 + 페이징 조회(작성자 함께 조인해서 조회)
+// 정렬은 Pageable 에 담아서 전달하므로 쿼리에 ORDER BY를 쓰지 않음 !!
+    @Query(value = """
+                SELECT b FROM Board b JOIN FETCH b.user u
+                Where b.title Like Concat('%', :keyword, '%')
+                    or b.content Like Concat('%', :keyword, '%')
+            """,
+            countQuery = """
+                    Select Count(b) From Board b
+                    Where b.title Like Concat('%', :keyword, '%')
+                    or    b.content Like Concat('%', :keyword, '%') 
+                    """)
+    Page<Board> findAllKeywordJoinUser(Pageable pageable, @Param("keyword") String keyword);
+
     // 기본적인 CRUD 기능 다 만들어 져 있음.
+
     /**
-     *  1. 등록 및 수정 : save(Board entity);
-     *      - 엔티티를 DB에 저장합니다. ID가 없으면 INSERT, 있으면 UPDATE를 실행 함.
-     *
-     *  2. 단건 조회 :  findById(Long id)
-     *      - ID로 엔티티를 조회하면 Optional<Board> 타입을 반환합니다.
-     *
-     *  3. 전체 조회 : findAll();
-     *      - 테이블의 모든 데이터를 조회하며 List<Board>로 반환 됨
-     *
-     *  4. 삭제 : deleteById(Long id);
-     *     - 특정 ID를 가진 엔티티를 삭제합니다.
-     *
-     *  5. 데이터 개수: count();
-     *     - 전체 레코드의 개수를 반환합니다.
-     *  6. 존재 여부 확인 : existsById(Long id);
-     *     - 해당 ID를 가진 데이터가 있는지 확인하여 boolean 을 반환합니다.
+     * 1. 등록 및 수정 : save(Board entity);
+     * - 엔티티를 DB에 저장합니다. ID가 없으면 INSERT, 있으면 UPDATE를 실행 함.
+     * <p>
+     * 2. 단건 조회 :  findById(Long id)
+     * - ID로 엔티티를 조회하면 Optional<Board> 타입을 반환합니다.
+     * <p>
+     * 3. 전체 조회 : findAll();
+     * - 테이블의 모든 데이터를 조회하며 List<Board>로 반환 됨
+     * <p>
+     * 4. 삭제 : deleteById(Long id);
+     * - 특정 ID를 가진 엔티티를 삭제합니다.
+     * <p>
+     * 5. 데이터 개수: count();
+     * - 전체 레코드의 개수를 반환합니다.
+     * 6. 존재 여부 확인 : existsById(Long id);
+     * - 해당 ID를 가진 데이터가 있는지 확인하여 boolean 을 반환합니다.
      *
      */
 
