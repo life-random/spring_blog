@@ -3,6 +3,7 @@ package com.tenco.spring_blog.user;
 
 import com.tenco.spring_blog._core.error.Exception400;
 import com.tenco.spring_blog._core.error.Exception404;
+import com.tenco.spring_blog._core.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,8 +49,15 @@ public class UserService {
                     throw new Exception400("이미 사용 중인 이메일입니다");
                 });
 
-        // 2. 저장
-        User savedUser = userJpaRepository.save(joinDto.toEntity());
+        // 3. 프로필 이미지 저장 ( 새로게 생긴 파일 이름이 리턴 됨)
+        String profileImage = FileUtil.saveImage(joinDto.getProfileImage());
+
+        // 4. 프로필 파일 이름과 회원 정보 저장
+        User user = joinDto.toEntity(profileImage);
+        // Role 기본값 할당
+        user.addRole(Role.USER);
+        User savedUser = userJpaRepository.save(user);
+
         log.info("회원가입 서비스 처리 완료 - 사용자명: {}, ID: {} ", joinDto.getUsername(), savedUser.getId());
         return new UserResponse.JoinDto(savedUser);
     }
@@ -108,5 +116,11 @@ public class UserService {
         log.info("사용자 정보 조회 - ID : {}", id);
         return userJpaRepository.findById(id)
                 .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다"));
+    }
+
+    // 마이페이지 조회 기능
+    public UserResponse.DetailDto findDetail(Long userId) {
+        User user = findById(userId);
+        return new UserResponse.DetailDto(user);
     }
 }

@@ -4,6 +4,7 @@ import com.tenco.spring_blog._core.error.Exception400;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
+
 public class UserRequest {
 
     // 회원정보 수정용 DTO
@@ -37,7 +38,7 @@ public class UserRequest {
                 throw new Exception400("사용자명은 필수 입니다. ");
             }
             if(password == null || password.trim().isEmpty()) {
-                throw new Exception400("패스워드는 필수 입니다. ");
+                throw new Exception400("비밀번호는 필수 입니다. ");
             }
             if(email == null || email.trim().isEmpty()) {
                 throw new Exception400("이메일은 필수 입니다. ");
@@ -52,12 +53,12 @@ public class UserRequest {
         // DTO 에서 User 엔티티로 변환하는 메서드
         // 계층 간 데이터 변환을 명확하게 분리하는 것이 좋다.
         // toEntity() <-- 메서드 이름 (이 메서드를 호출하면 User 객체를 반환하는 코드를 작성하시오)
-        public User toEntity(String profileImage) {
+        public User toEntity(String profileImageFilename) {
             return User.builder()
                     .username(username)
                     .password(password)
                     .email(email)
-                    .profileImage(profileImage)
+                    .profileImage(profileImageFilename)
                     .build();
         }
 
