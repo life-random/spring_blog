@@ -2,6 +2,7 @@ package com.tenco.spring_blog.user;
 
 import com.tenco.spring_blog._core.error.Exception400;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UserRequest {
 
@@ -9,6 +10,7 @@ public class UserRequest {
     @Data
     public static class UpdateDto {
         private String password;
+        private MultipartFile profileImage; // 새 프로필 이미지 (선택 사항)
 
         public void validate() {
             if(password == null || password.trim().isEmpty()) {
@@ -27,6 +29,7 @@ public class UserRequest {
         private String username;
         private String password;
         private String email;
+        private MultipartFile profileImage; // 프로필 이미지 (선택 사항)
 
         // 회원가입시 데이터 검증 메서드
         public void validate() {
@@ -49,11 +52,12 @@ public class UserRequest {
         // DTO 에서 User 엔티티로 변환하는 메서드
         // 계층 간 데이터 변환을 명확하게 분리하는 것이 좋다.
         // toEntity() <-- 메서드 이름 (이 메서드를 호출하면 User 객체를 반환하는 코드를 작성하시오)
-        public User toEntity() {
+        public User toEntity(String profileImage) {
             return User.builder()
                     .username(username)
                     .password(password)
                     .email(email)
+                    .profileImage(profileImage)
                     .build();
         }
 
