@@ -16,6 +16,22 @@ public class UserController {
 
     private final UserService userService;
 
+    @PostMapping("/user/profile-image/delete")
+    public String deleteProfileImage(HttpSession session){
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        userService.deleteProfileImage(sessionUserDto.getId());
+        return "redirect:/user/detail";
+    }
+
+    // GET http://localhost:8080/user/detail
+    @GetMapping("/user/detail")
+    public String detail(Model model, HttpSession session) {
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        UserResponse.DetailDto user = userService.findDetail(sessionUserDto.getId());
+        model.addAttribute("user", user);
+        return "user/detail";
+    }
+
     // GET http://localhost:8080/join
     @GetMapping("/join")
     public String joinForm() {
@@ -49,7 +65,7 @@ public class UserController {
     // GET http://localhost:8080/user/update
     @GetMapping("/user/update")
     public String updateForm(Model model, HttpSession session) {
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
+        SessionUserDto sessionUser = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
         UserResponse.updateFormDto userUpdateFormDto = userService.findUpdateForm(sessionUser.getId());
         model.addAttribute("user", userUpdateFormDto);
         return "user/update-form";
@@ -59,11 +75,11 @@ public class UserController {
     @PostMapping("/user/update")
     public String update(UserRequest.UpdateDto updateDto, Model model, HttpSession session) {
         updateDto.validate();
-        User sessionUser = (User) session.getAttribute(Define.SESSION_USER);
-        SessionUserDto sessionUserDto = userService.updateById(sessionUser.getId(), updateDto);
+        SessionUserDto sessionUserDto = (SessionUserDto) session.getAttribute(Define.SESSION_USER);
+        SessionUserDto updateSessionUserDto = userService.updateById(sessionUserDto.getId(), updateDto);
         // 세션 동기화 처리
-        session.setAttribute(Define.SESSION_USER, sessionUserDto);
-        return "redirect:/";
+        session.setAttribute(Define.SESSION_USER, updateSessionUserDto);
+        return "redirect:/user/detail";
     }
 
     // GET http://localhost:8080/logout
