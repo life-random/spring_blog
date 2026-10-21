@@ -153,6 +153,21 @@ public class UserService {
         return new UserResponse.DetailDto(user);
     }
 
+    @Transactional
+    public SessionUserDto naverLogin(UserResponse.NaverUserInfo naverUserInfo) {
+
+        String username = "naver_" + naverUserInfo.getResponse().getId();
+
+        User user = userJpaRepository.findByUsernameWithRoles(username)
+                .orElseGet(() -> joinNaverUser(username, naverUserInfo));
+
+        if (user.getProvider() != OAuthProvider.NAVER) {
+            throw new Exception400("이미 사용 중인 사용자명입니다");
+        }
+
+        return new SessionUserDto(user);
+    }
+
     // 카카오 로그인 : 처음이면 자동 회원가입, 이미 있으면 로그인
     @Transactional
     public SessionUserDto kakaoLogin(UserResponse.KakaoUserInfo kakaoUserInfo) {
@@ -171,6 +186,18 @@ public class UserService {
 
         // 트랜잭션 안에서 SessionUserDto 생성
         return new SessionUserDto(user);
+    }
+
+    private User joinNaverUser(String username, UserResponse.NaverUserInfo naverUserInfo) {
+        User newUser = User.builder()
+                .username(username)
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .email(username + "@" + "naver.com")
+                .profileImage(naverUserInfo.getResponse().getProfileImage())
+                .provider(OAuthProvider.NAVER)
+                .build();
+        newUser.addRole(Role.USER);
+        return userJpaRepository.save(newUser);
     }
 
     private User joinKakaoUser(String username, UserResponse.KakaoUserInfo kakaoUserInfo) {

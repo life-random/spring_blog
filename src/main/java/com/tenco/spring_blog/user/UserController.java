@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -29,7 +30,21 @@ public class UserController {
 
     private final UserService userService;
     private final KakaoLoginService kakaoLoginService;
-    
+    private final NaverLoginService naverLoginService;
+
+    @GetMapping("/naver-login")
+    public String naverLogin() {
+        return "redirect:" + naverLoginService.getAuthorizeUrl();
+    }
+
+    @GetMapping("/oauth/naver")
+    public String naverCallback(@RequestParam(name = "code", required = false) String code,
+                                HttpSession session) {
+        SessionUserDto sessionUserDto = naverLoginService.login(code);
+        session.setAttribute(Define.SESSION_USER, sessionUserDto);
+        return "redirect:/";
+    }
+
     @GetMapping("/kakao-login")
     public String kakaoLogin() {
         return "redirect:" + kakaoLoginService.getAuthorizeUrl();

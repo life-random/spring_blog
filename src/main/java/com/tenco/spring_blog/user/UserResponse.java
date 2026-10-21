@@ -55,6 +55,21 @@ public class UserResponse {
         }
     }
 
+    @Data
+    public static class NaverOauthToken {
+        @JsonProperty("access_token")
+        private String accessToken;
+        @JsonProperty("refresh_token")
+        private String refreshToken;
+        @JsonProperty("token_type")
+        private String tokenType;
+        @JsonProperty("expires_in")
+        private Integer expiresIn;
+        private String error;
+        @JsonProperty("error_description")
+        private String errorDescription;
+    }
+
     // 카카오 액세스 토큰 응답 DTO
     @Data
     public static class OauthToken {
@@ -90,6 +105,24 @@ public class UserResponse {
             private String profileImage;
             @JsonProperty("thumbnail_image")
             private String thumbnailImage;
+        }
+    }
+
+    @Data
+    public static class NaverUserInfo {
+
+        @JsonProperty("resultcode")
+        private String resultCode;
+        private String message;
+        private Response response;
+
+        @Data
+        public static class Response {
+
+            private String id;
+            @JsonProperty("profile_image")
+            private String profileImage;
+            private String name;
         }
     }
 }

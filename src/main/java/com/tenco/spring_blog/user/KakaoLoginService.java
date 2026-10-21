@@ -10,7 +10,7 @@ import org.springframework.web.client.ResourceAccessException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KakaoLoginService {
+public class   KakaoLoginService {
 
     private final KakaoApiClient kakaoApiClient;
     private final UserService userService;
