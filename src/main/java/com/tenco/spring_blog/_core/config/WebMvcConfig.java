@@ -6,7 +6,10 @@ import com.tenco.spring_blog._core.interceptor.LoginInterceptor;
 import com.tenco.spring_blog._core.interceptor.SessionUserModelInterceptor;
 import com.tenco.spring_blog._core.util.FileUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -16,7 +19,6 @@ import java.nio.file.Paths;
 //IoC
 @RequiredArgsConstructor
 @Configuration  // 스프링 설정 클래스임을 표시 (빈으로도 등록 됨)
-
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
@@ -66,5 +68,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     }
 
+    // 비밀번호 해싱 도구를 빈으로 등록 (필요한 속에서 DI 할 수 있다.
+    @Bean   // IoC 처리 됨
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
 
 }

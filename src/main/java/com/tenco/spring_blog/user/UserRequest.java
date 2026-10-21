@@ -13,11 +13,23 @@ public class UserRequest {
         private String password;
         private MultipartFile profileImage; // 새 프로필 이미지 (선택 사항)
 
+        // 비밀번호를 입력했는지 (null, "", "   " ,공백만 입력 모두 -> 입력 안함으로 볼 예정)
+        public boolean hasPassword() {
+            // 비밀번호 입력시 --> true 반환
+            return password != null && !password.isBlank();
+        }
+
+        // 새 프로필 사진을 골랐는지
+        public boolean hasProfileImage() {
+            // 새 파일 선택 시 --> true 반환
+            return profileImage != null && !profileImage.isEmpty();
+        }
+
         public void validate() {
-            if(password == null || password.trim().isEmpty()) {
-                throw new Exception400("비밀번호는 필수입니다");
+            if (!hasPassword() && !hasProfileImage()) {
+                throw new Exception400("변경할 비밀번호나 프로필 사진을 입력해주세요");
             }
-            if (password.length() < 4) {
+            if (hasPassword() && password.length() < 4) {
                 throw new Exception400("비밀번호는 4글자 이상이어야 합니다");
             }
             // 필요하다면 길이 수 제한, 특수문자 포함여부 (정규식) 활용 가능
@@ -53,10 +65,10 @@ public class UserRequest {
         // DTO 에서 User 엔티티로 변환하는 메서드
         // 계층 간 데이터 변환을 명확하게 분리하는 것이 좋다.
         // toEntity() <-- 메서드 이름 (이 메서드를 호출하면 User 객체를 반환하는 코드를 작성하시오)
-        public User toEntity(String profileImageFilename) {
+        public User toEntity(String profileImageFilename, String encodePassword) {
             return User.builder()
                     .username(username)
-                    .password(password)
+                    .password(encodePassword)
                     .email(email)
                     .profileImage(profileImageFilename)
                     .build();

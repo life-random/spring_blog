@@ -13,3 +13,11 @@ spring:
       max-file-size: 10MB      # 파일 하나의 최대 크기
       max-request-size: 11MB
 
+  # 초기 파라미터 설정
+
+oauth:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID}
+    client-secret: ${KAKAO_CLIENT_SECRET}
+    redirect-uri: ${REDIRECT_URI}
+

@@ -3,6 +3,7 @@ package com.tenco.spring_blog.user;
 import com.tenco.spring_blog.board.BoardRequest;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -42,13 +43,20 @@ public class User {
     @JoinColumn(name = "user_id", nullable = false)
     private List<UserRole> roles = new ArrayList<>();
 
+    // 가입 경로 (DB 에는 LOCAL, KAKAO 문자열 저장될 예정)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @ColumnDefault("'LOCAL'")   // 문자열이므로 안에 작은 따옴표 필수 !
+    private OAuthProvider provider;
+
     // id 와 createdAt은 자동으로 채워지므로 빌더에서 제외
     @Builder
-    public User(String username, String password, String email, String profileImage) {
+    public User(String username, String password, String email, String profileImage, OAuthProvider provider) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.profileImage = profileImage;
+        this.provider = (provider == null)? OAuthProvider.LOCAL : provider;
     }
 
     // 프로필 이미지 변경(null 이면 삭제) - 트랜잭션 안에서 호출하면 더티 체킹 발생 됨
@@ -83,5 +91,16 @@ public class User {
     // 로그인 한 사용자의 관리자 여부 확인 메서드
     public boolean isAdmin() {
         return hasRole(Role.ADMIN); // 고정 값 : 관리자 여부인지만 확인 true, false 반환
+    }
+
+    public String getProfilePath() {
+        if(this.profileImage == null){
+            return null;
+        }
+        if (this.profileImage.startsWith("http")){
+            return this.profileImage;
+        }
+        return  "/images/" + this.profileImage;
+
     }
 }
