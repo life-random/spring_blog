@@ -101,9 +101,6 @@ public class UserService {
 
     /**
      * 회원 정보 수정 화면 : 화면에 필요한 값만 담는 DTO 반환
-     *
-     * @param userId
-     * @return
      */
     public UserResponse.updateFormDto findUpdateForm(Long userId) {
         User user = findById(userId);

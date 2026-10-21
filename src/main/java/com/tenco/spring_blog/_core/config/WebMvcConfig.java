@@ -6,6 +6,7 @@ import com.tenco.spring_blog._core.interceptor.LoginInterceptor;
 import com.tenco.spring_blog._core.interceptor.SessionUserModelInterceptor;
 import com.tenco.spring_blog._core.util.FileUtil;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,7 +29,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     // 업로드 폴더의 파일일 /images/** 주소로 제공
     @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
         // 업로드 폴더 경로를 file:///.... 형식의 주소로 변환(운영체제에 맞게 자동 변환)
         String location = Paths.get(FileUtil.UPLOAD_DIR).toUri().toString();
         // 윈도우 기준 : C:\Users\사용자명\blog_uploads\
