@@ -69,9 +69,14 @@ public class UserController {
 
     // POST http://localhost:8080/join
     @PostMapping("/join")
-    public String join(UserRequest.JoinDto joinDto, Model model) {
+    public String join(UserRequest.JoinDto joinDto, Model model, HttpSession session) {
         joinDto.validate();
-        userService.join(joinDto);
+        // 이메일 인증 완료된 값 꺼내오기 (세션에 저장된 상태)
+        String verifiedEmail = (String) session.getAttribute(Define.VERIFIED_EMAIL);
+        userService.join(joinDto, verifiedEmail);
+
+        // 회원가입 이후 저장한 세션 이메일 정보 제거
+        session.removeAttribute(Define.VERIFIED_EMAIL);
         return "redirect:/login";
     }
 

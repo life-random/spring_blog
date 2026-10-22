@@ -37,8 +37,15 @@ public class UserService {
      * @return 저장된 사용자 정보
      */
     @Transactional // 쓰기 작업이므로 트랜잭선 활성화
-    public UserResponse.JoinDto join(UserRequest.JoinDto joinDto) {
+    public UserResponse.JoinDto join(UserRequest.JoinDto joinDto, String verifiedEmail) {
         log.info("회원가입 서비스 처리 시작 - 사용자명: {}", joinDto.getUsername());
+
+        // 0. 이메일 인증 여부 확인 (추가)
+        // 인증하지 않았거나, 인증한 이메일과 가입 폼의 이메일이 다르면 거부
+        if (verifiedEmail == null || !verifiedEmail.equals(joinDto.getEmail())){
+            throw new Exception400("이메일 인증을 먼저 완료해주세요");
+        }
+
         // 1. 중복 체크 : 이미 있으면 null 이 아님 (ifPresent 차이점 확인)
         userJpaRepository.findByUsernameWithRoles(joinDto.getUsername())
                 .ifPresent(user -> {
@@ -46,21 +53,13 @@ public class UserService {
                     throw new Exception400("이미 존재하는 사용자명입니다");
                 });
 
-        // 2. 이메일 중복 검사
-        userJpaRepository.findByEmail(joinDto.getEmail())
-                .ifPresent(user -> {
-                    log.warn("회원가입 실패 - 중복된 이메일 : {}", joinDto.getEmail());
-                    throw new Exception400("이미 사용 중인 이메일입니다");
-                });
-
-        // 3. 프로필 이미지 저장 ( 새로게 생긴 파일 이름이 리턴 됨)
+        // 2. 프로필 이미지 저장 ( 새로게 생긴 파일 이름이 리턴 됨)
         String profileImage = FileUtil.saveImage(joinDto.getProfileImage());
 
-        // 4. 비밀번호 해싱 처리
+        // 3. 비밀번호 해싱 처리
         String encodePassword = passwordEncoder.encode(joinDto.getPassword());
 
-
-        // 5. 프로필 파일 이름과 회원 정보 저장
+        // 4. 프로필 파일 이름과 회원 정보 저장
         User user = joinDto.toEntity(profileImage, encodePassword);
 
         // Role 기본값 할당

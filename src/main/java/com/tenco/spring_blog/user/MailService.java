@@ -34,7 +34,6 @@ public class MailService {
             helper.setTo(email);
             helper.setSubject("[스프링블로그] 회원가입 인증번호");
             helper.setText("<h3>인증번호는 " + code + " 입니다</h3>", true);
-
         } catch (Exception e) {
             throw new Exception500("메일 작성 중 오류가 발생했습니다");
         }
@@ -42,6 +41,7 @@ public class MailService {
         // 1 - 3 발송 (실패하면 ...)
         javaMailSender.send(message);
 
+        session.setAttribute("isEmailCheck", false);
         session.setAttribute(Define.EMAIL_CODE_PREFIX + email, code);
         log.info("인증번호 발송 완료 - 이메일 : {}" + email);  // 인증번호 자체는 로그에 남기지 않는게 좋음
     }
@@ -53,13 +53,11 @@ public class MailService {
             return false;
         }
 
-
+        session.setAttribute("isEmailCheck", true);
         // 사용한 인증번호는 삭제 (한 번만 사용할 수 있게)
         session.removeAttribute(Define.EMAIL_CODE_PREFIX + email);
         // 인증을 마친 이메일은 세션에 기록해야 함 회원가입 시 서버가 확인) - 인증된 이메일이 아닌 변조해서 던질 수 있음
         session.setAttribute(Define.VERIFIED_EMAIL, email);
         return true;
-
     }
-
 }
