@@ -1,0 +1,155 @@
+{{> layout/header}}
+
+
+<div class="container p-5">
+    <div class="card">
+        <div class="card-header"><b>회원가입</b></div>
+        <div class="card-body">
+            <!-- 이메일 입력 + 인증번호 전송 -->
+            <div class="mb-3">
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" placeholder="전화번호 입력 ex) 01012345678" name="phone" id="phone"
+                           required>
+                    <button type="button" class="btn btn-outline-secondary" id="send-btn" onclick="sendCode()">
+                        인증 번호 전송
+                    </button>
+                </div>
+                <p class="text-info blue" id="timer"></p>
+            </div>
+
+            <!-- 인증 번호 입력 (처음엔 숨김, 발송 후 보임 )-->
+            <div class="mb-3" id="code-box">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="code" placeholder="인증번호 입력" maxlength="10">
+                    <button type="button" class="btn btn-outline-secondary" onclick="verifyCode()">확인</button>
+                </div>
+                <div id="msg" class="form-text"></div>
+            </div>
+
+            <div class="mb-3">
+                <a href="/user/detail">
+                    <button class="btn btn-secondary">마이페이지로 돌아가기</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isMessageVerified = false;
+    let isMessageSend = false;
+    const msgBox = document.querySelector("#msg");
+
+    async function sendCode() {
+        const phone = document.querySelector("#phone").value; // 사용자 입력 : a@naver.com
+        if (phone.trim() === "" || phone.length < 11) {
+            msgBox.innerHTML = "전화번호를 입력해주세요";
+            msgBox.className = "form-text text-danger"
+            return;
+        }
+
+        // 메일 발송은 몇 초 걸리므로, 그 동안 버튼을 막아 중복 요청을 방지 한다 (중요!)
+        const sendBtn = document.querySelector("#send-btn");
+        sendBtn.disabled = true;
+        sendBtn.innerText = "전송 중 ...";
+
+        try {
+            const response = await fetch("/api/sms/send", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"}, // 바디가 JSON 이라고 알림
+                body: JSON.stringify({phone: phone})            // 객체 --> JSON 문자열로 변환 됨
+            })
+
+            const result = await response.json()
+            if (response.ok) {
+                document.querySelector("#code-box").style.display = "block";
+
+                // 발송 성공했을 때만 카운트다운 시작
+                startCountdown();
+            } else {
+                // 서버에서 거부한 메시지 표시
+                msgBox.textContent = result.message;
+                msgBox.className = "form-text text-danger";
+
+                // 기존 카운트다운은 건드리지 않음
+                return;
+            }
+
+
+        } catch (e) {
+            console.error("SMS 요청 오류:", e);
+            alert("오류가 발생했습니다: " + e.message);
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerText = "인증번호 전송"
+        }
+    }
+
+    async function verifyCode() {
+        const phone = document.querySelector("#phone").value;
+        const code = document.querySelector("#code").value;
+
+        if (isMessageSend) {
+            msgBox.innerHTML = "인증번호를 먼저 발급해주세요";
+            msgBox.className = "form-text text-danger"
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/sms/verify", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({phone: phone, code: code}) // 객체ㅔ --> JSON 으로 변환
+            });
+            const result = await response.json();   // JSON --> 객체로 변환
+            const msgBox = document.querySelector("#msg");
+            if (response.ok) {
+                isEmailVerified = true;
+                msgBox.innerHTML = result.message;  // "인증 되었습니다"
+                msgBox.className = "form-text text-success";
+                // 인증한 이메일을 화면단에서 바꾸지 못하게 잠금
+                document.querySelector("#phone").readOnly = true;
+                document.querySelector("#send-btn").readOnly = true;
+            } else {
+                msgBox.innerHTML = result.message;
+                msgBox.className = "form-text text-danger"
+            }
+        } catch (e) {
+            console.log(e)
+            alert("서버와 통신하지 못했습니다");
+            return;
+        }
+    }
+
+    let countdownTimer = null;
+
+    function startCountdown(seconds = 60) {
+        const button = document.querySelector("#send-btn");
+        const timerText = document.querySelector("#timer");
+
+        // 기존 타이머가 있다면 정리
+        clearInterval(countdownTimer);
+
+        let remaining = seconds;
+
+        button.disabled = true;
+        timerText.textContent = `${remaining}초 후 재전송 가능`;
+
+        countdownTimer = setInterval(() => {
+            remaining--;
+
+            if (remaining <= 0) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+
+                button.disabled = false;
+                timerText.textContent = "인증번호를 재전송할 수 있습니다.";
+                return;
+            }
+
+            timerText.textContent = `${remaining}초 후 재전송 가능`;
+        }, 1000);
+    }
+</script>
+
+{{> layout/footer}}

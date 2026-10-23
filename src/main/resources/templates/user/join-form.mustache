@@ -93,7 +93,7 @@
             const response =  await fetch("/api/email/verify", {
                 method: "POST",
                 headers : {"Content-Type" : "application/json"},
-                body: JSON.stringify({email: email, code: code}) // 객체ㅔ --> JSON 으로 변환
+                body: JSON.stringify({email: email, code: code}) // 객체 --> JSON 으로 변환
             });
             const result = await response.json();   // JSON --> 객체로 변환
             const msgBox = document.querySelector("#msg");
