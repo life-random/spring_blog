@@ -10,6 +10,7 @@ public class BoardRequest {
     public static class SaveDto {
         private String title;
         private String content;
+        private boolean premium;    // 유료 게시글 여부 (체크 안하면 false)
 
         // 검증 메서드 (선택 사항)
         public void validate() {
@@ -26,6 +27,7 @@ public class BoardRequest {
                     .title(this.title)
                     .content(this.content)
                     .user(user) // 세션에서 가져온 User 객체 설정
+                    .premium(this.premium)
                     .build();
         }
     }
@@ -34,6 +36,7 @@ public class BoardRequest {
     public static class UpdateDto {
         private String title;
         private String content;
+        private boolean premium;
 
         // 검증 메서드 (선택 사항)
         public void validate() {

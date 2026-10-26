@@ -30,6 +30,7 @@ public class UserService {
     private final UserJpaRepository userJpaRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     /**
      * 회원가입 처리
      *
@@ -201,4 +202,13 @@ public class UserService {
                     throw new Exception400("이미 등록된 이메일입니다");
                 });
     }
+
+    @Transactional
+    public int chargePoint(Long userId, Integer amount) {
+        User user = findById(userId);
+        user.chargePoint(amount); // 더티 체킹으로 UPDATE 됨
+        log.info("포인트 충전 완료 - 사용자 ID : {}, 충전 : {} ,  보유 포인트 : {}", userId, amount, user.getPoint());
+        return user.getPoint();
+    }
+
 }
