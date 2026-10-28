@@ -6,7 +6,7 @@ spring:
       expose-session-attributes: false # 머스태치 파일에서 세션 담을 값을 바로 사용 가능
 
   profiles:
-    active: prod
+    active: dev
 
   # 메일 발송 설정 (추가)
   mail:
