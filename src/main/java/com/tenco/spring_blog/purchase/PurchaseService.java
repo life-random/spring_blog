@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -59,4 +61,17 @@ public class PurchaseService {
 
         purchaseJpaRepository.save(purchase);
     }
+
+    /**
+     * 구매 내역 조회
+     * @param userId 로그인한 사용자 PK
+     */
+    public List<PurchaseResponse.ListDto> findAllByUserId(Long userId){
+        List<Purchase> purchaseList = purchaseJpaRepository.findAllByUserIdJoinBoard(userId);
+        // 2. 트랜잭션 안에서 엔티티를 응답 DTO로 변환해서 리턴
+        return purchaseList.stream()
+                .map(PurchaseResponse.ListDto::new)
+                .toList();
+    }
+
 }
