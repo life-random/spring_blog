@@ -6,14 +6,14 @@ spring:
       expose-session-attributes: false # 머스태치 파일에서 세션 담을 값을 바로 사용 가능
 
   profiles:
-    active: dev
+    active: prod
 
   # 메일 발송 설정 (추가)
   mail:
     host: smtp.gmail.com        # Gmail SMTP 서버 주소
     port: 587                   # STARTTLS 포트
-    username: ${MAIL_USERNAME}  # 발신 Gmail 주소 (.env)
-    password: ${MAIL_PASSWORD}  # 16자리 앱 비밀번호 (.env, 구글 로그인 비밀번호 아님)
+    username: ${MAIL_USERNAME:}  # 발신 Gmail 주소 (.env)
+    password: ${MAIL_PASSWORD:}  # 16자리 앱 비밀번호 (.env, 구글 로그인 비밀번호 아님)
     properties:
       mail:
         smtp:
@@ -35,11 +35,18 @@ spring:
       session:
         tracking-modes: cookie    # 세션 번호를 쿠키로만 전달 (주소에 ;jsessionid 를 붙이지 않음)
 
-  # 초기 파라미터 설정
+# 초기 파라미터 설정
 
 oauth:
   kakao:
-    client-id: ${KAKAO_CLIENT_ID}
-    client-secret: ${KAKAO_CLIENT_SECRET}
-    redirect-uri: ${REDIRECT_URI}
+    client-id: ${KAKAO_CLIENT_ID:}
+    client-secret: ${KAKAO_CLIENT_SECRET:}
+    redirect-uri: ${REDIRECT_URI:}
+
+# 포트원 V2 (결제 설정)
+# ":" 뒤가 비어 있으면 .env에 값이 없어도 서버는 시작 됨 (결제할 때 실패)
+portone:
+  store-id: ${PORTONE_STORE_ID:}
+  channel-key: ${PORTONE_CHANNEL_KEY:}
+  api-secret: ${PORTONE_API_SECRET:}
 
