@@ -7,6 +7,12 @@ import lombok.Data;
 
 public class PaymentResponse {
 
+    public static class ListDto{
+        private Long id;
+        private String paymentId;
+
+    }
+
     // 1 단계 응답 : 브라우저가 결제창 띄울 때 사용
     @Data
     public static class PrepareDto {
