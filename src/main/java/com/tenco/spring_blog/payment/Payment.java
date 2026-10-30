@@ -56,20 +56,23 @@ public class Payment {
     // 편의 메서드 설계
 
     // 결제를 요청한 사용자인지 확인
-    public boolean isOwner(Long userId){
+    public boolean isOwner(Long userId) {
         return this.user.getId().equals(userId);
     }
 
     // 이미 처리 (포인트 지급)된 결제 인지 확인
-    public boolean isPaid(){
+    public boolean isPaid() {
         return this.status == PaymentStatus.PAID;
     }
 
     // 추후 - 검증 통과 후 결제 완료로 변경 처리 (더티 체킹)
-    public void markPaid(String pgTxId){
+    public void markPaid(String pgTxId) {
         this.status = PaymentStatus.PAID;   // 결제 상태를 완료로 변경
         this.pgTxId = pgTxId;   // null 값 허용
     }
 
+    public void markCancelled(){
+        this.status = PaymentStatus.CANCELLED;
+    }
 
 }

@@ -16,6 +16,7 @@ public class PurchaseResponse {
         private int price;              // 구매 당시 가격
         private String purchasedAt;      // 구매일 (포맷된 문자열)
 
+
         @Builder
         public ListDto(Purchase purchase) {
             this.id = purchase.getId();
