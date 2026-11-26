@@ -12,12 +12,12 @@ public class UserRequest {
     public static class PointChargeDto {
         private Integer amount; // 충전할 포인트
 
-        public void validate(){
-            if (amount == null || amount <= 0){
+        public void validate() {
+            if (amount == null || amount <= 0) {
                 throw new Exception400("충전할 포인트는 0보다 커야합니다");
             }
-            if (amount > 100000){
-                throw  new Exception400("한 번에 100,000 포인트까지 충전할 수 있습니다");
+            if (amount > 100000) {
+                throw new Exception400("한 번에 100,000 포인트까지 충전할 수 있습니다");
             }
         }
     }
@@ -28,11 +28,11 @@ public class UserRequest {
         private String email; // 이메일 주소 ( 첫 번째 요청 시 사용)
         private String code; // 인증 번호 ( 2 번째 요청 시 사용)
 
-        public  void validate() {
+        public void validate() {
             if (email == null || email.trim().isEmpty()) {
                 throw new Exception400("이메일을 입력해주세요");
             }
-            if (!email.contains("@")){
+            if (!email.contains("@")) {
                 throw new Exception400("올바른 이메일 형식이 아닙니다");
             }
         }
@@ -40,7 +40,7 @@ public class UserRequest {
         // 인증번호 확인  API에서 추가로 호출할 예정
         public void validateCode() {
             validate();
-            if (code == null || code.trim().isEmpty()){
+            if (code == null || code.trim().isEmpty()) {
                 throw new Exception400("인증번호를 입력해주세요");
             }
         }
@@ -85,17 +85,17 @@ public class UserRequest {
 
         // 회원가입시 데이터 검증 메서드
         public void validate() {
-            if(username == null || username.trim().isEmpty()) {
+            if (username == null || username.trim().isEmpty()) {
                 throw new Exception400("사용자명은 필수 입니다. ");
             }
-            if(password == null || password.trim().isEmpty()) {
+            if (password == null || password.trim().isEmpty()) {
                 throw new Exception400("비밀번호는 필수 입니다. ");
             }
-            if(email == null || email.trim().isEmpty()) {
+            if (email == null || email.trim().isEmpty()) {
                 throw new Exception400("이메일은 필수 입니다. ");
             }
             // 간단하게 이메일 형식 검증
-            if(!email.contains("@")) {
+            if (!email.contains("@")) {
                 throw new Exception400("올바른 이메일 형식이 아닙니다");
             }
 
@@ -122,10 +122,10 @@ public class UserRequest {
 
         // 회원가입시 데이터 검증 메서드
         public void validate() {
-            if(username == null || username.trim().isEmpty()) {
+            if (username == null || username.trim().isEmpty()) {
                 throw new Exception400("사용자명은 필수 입니다. ");
             }
-            if(password == null || password.trim().isEmpty()) {
+            if (password == null || password.trim().isEmpty()) {
                 throw new Exception400("패스워드는 필수 입니다. ");
             }
         }
